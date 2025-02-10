@@ -1,14 +1,19 @@
---1. npm init -y
---2. npm i express mongodb mongoose nodemon dotenv cors bcrypt cookie-parser morgan jsonwebtoken
+### STEP 1. 
+    npm init -y
+### STEP 2.
+    npm i express mongodb mongoose nodemon dotenv cors bcrypt cookie-parser morgan jsonwebtoken
 
---3. Make folders "config", "models"
+### STEP 3.
+    Make folders "config", "models"
 
---4. make a .gitignore --> 
+### STEP 4.
+    make a .gitignore --> 
     `node_modules 
     .env
     `
 
---5. make a .env file -->
+### STEP 5.
+    make a .env file -->
     `MONGO_DB_URL=
     MONGO_DB_PASSWORD=
     MONGO_DB_DATABASE_NAME=
@@ -31,7 +36,8 @@ MONGO_DB_URL=mongodb+srv://likhileshbalpande:<db_password>@cluster0.abcdx.mongod
 MONGO_DB_PASSWORD=mypasshardword
 MONGO_DB_DATABASE_NAME=LPU_TASK_MANAGEMENT_MERN_ONLINE
 
---6. Inside config --> dbConfig.js -->
+### STEP 6.
+    Inside config --> dbConfig.js -->
 
     `const mongoose = require("mongoose");
 
@@ -52,22 +58,27 @@ MONGO_DB_DATABASE_NAME=LPU_TASK_MANAGEMENT_MERN_ONLINE
     connectToDb(); 
     `
 
---7. Make app.js file --> 
+### STEP 7.
+    Make app.js file --> 
     `
     `
 
---8. run the application to check if it is working-->
+### STEP 8.
+    run the application to check if it is working-->
     npx nodemon app.js
 
 ## HTTP STATUS CODES
 (https://static.semrush.com/blog/uploads/media/3a/79/3a7950050980a0e2de37bc1a632cc321/wmkPPztB7KlAC7fPzO0-85NG8t0B9IEh4JEbt_ELP1pvJMhof9vt2pDSwrBZeXodoqaoV_Es1Rur-AWoeoOdV-RIde2vjqyMQuxrqch62uXZ1bsI0yaaMWx-f4cg4BlmOQrI2kFJ6CPXECCd69KeopE.png)
+    
     1XX --> nothing imp for you
+    
     3XX --> nothing imp for you
 
     2XX --> success -->
         200 --> OK (In general)
         201 --> created (CREATE / POST)
         204 --> No content (DELETE)
+    
     4XX --> mistake of client
         400 --> bad request (validation error, or something is missing which was required, ...)
         401 --> unauthorized (the user does not have permission)
@@ -79,14 +90,17 @@ MONGO_DB_DATABASE_NAME=LPU_TASK_MANAGEMENT_MERN_ONLINE
             (connection issue, ram outage, processor outage, or ...)
     
 
---9. Make a userModel.js file -->
+### STEP 9.
+    Make a userModel.js file -->
     // 1. make a schema
     // 2. make a model --> attached to a collection and schema
     // then use this model anywhere to work on the collection like find documents, add document, delete document, update document
     
--- 10. Make a BASIC post api to create a BASIC user
+### STEP 10.
+    Make a BASIC post api to create a BASIC user
 
--- 11. IMPORTANT STEP: to do in app.js: 
+### STEP 11.
+    IMPORTANT STEP: to do in app.js: 
     add these middlewares to your code -->
     `
         ...
@@ -98,7 +112,14 @@ MONGO_DB_DATABASE_NAME=LPU_TASK_MANAGEMENT_MERN_ONLINE
         ...
     `
 
-## HTTP METHODS or VERBS : (https://medium.com/@hhphu/understanding-http-verb-tampering-in-web-security-e2a167a9917e)
+## HTTP METHODS or VERBS : 
+* GET : Read / Search / Find
+* POST : Create / make new entry in DB
+* PATCH : Edit a part of data
+* PUT : Edit the data but at a level where it equivalent to replace
+* DELETE :  Delete something from database
+
+* (https://medium.com/@hhphu/understanding-http-verb-tampering-in-web-security-e2a167a9917e)
 
 ## how view database ?  collections ? documents
 --> go to "clusters" in left panel --> click on "browse collections" --> select your database --> select your collection --> now you will see all your documents
