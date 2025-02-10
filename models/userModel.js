@@ -16,6 +16,15 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        //     type: {
+        //         type: String,
+        //         default: "client",
+        //         enum: ["client", "user", "admin"],
+        //     },
+        // age: {
+        //     type: Number,
+        // },
+        // age: Number,
     },
     {
         timestamps: true, // this automatically add the server time of document creation / updating

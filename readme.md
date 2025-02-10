@@ -123,3 +123,31 @@ MONGO_DB_DATABASE_NAME=LPU_TASK_MANAGEMENT_MERN_ONLINE
 
 ## how view database ?  collections ? documents
 --> go to "clusters" in left panel --> click on "browse collections" --> select your database --> select your collection --> now you will see all your documents
+
+
+## Validation Keywords
+* type: mentions the data type for the value (it is mandatory in every property in schema)
+`   age: {
+        type: Number,
+    },
+`
+`    
+    age: Number,
+`
+in the second part, the limitation is you cannot add more validators
+if you want to add more validators other than type, then use "{" "}"
+
+* required: it mentions that the key should always be present in every entry that is made to the database
+* trim: removes the whitespaces, tabs, new lines at start & end (if any)
+* unique: it enforces that the value in this field should be unique in the given collection
+* enum: allowed options as value (you can only choose from these options (case-sensitive))
+* default: it gives the default value to the key when it is not present 
+(age: null) - then age will not get default value because null is also a value
+(anything that is undefined is considered as absent) 
+(age: undefined)
+* min
+* max
+* minLength
+* maxLength
+* match
+( Article to refer: https://mongoosejs.com/docs/validation.html )
