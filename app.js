@@ -7,6 +7,7 @@ const cors = require("cors"); // this allow the browser to enable frontend to co
 const User = require("./models/userModel.js");
 const { generateOTP } = require("./utils/otpHelpers.js");
 const { sendOtpEmail } = require("./utils/emailHelpers.js");
+const OTP = require("./models/otpModel.js");
 
 // --------------------------------------------------------------
 const app = express(); // we are creating a server using express
@@ -99,16 +100,38 @@ app.post("/otps", async (req, res) => {
         return;
     }
 
+    //TODO: Homework:
+    // check if the otp is already sent to that email within last X Minutes
+    // OTP.find().where("createdAt").gte(...) current time - X minutes
+
     // create a 4 digit OTP
     const otp = generateOTP();
 
     // send the OTP to email
     const isEmailSent = await sendOtpEmail(email, otp);
 
-    console.log("🟡 : isEmailSent:", isEmailSent);
+    // isEmailSent can be true or false
+    if (!isEmailSent) {
+        // this is the case when isEmailSent is false
+        res.status(500).json({
+            status: "fail",
+            message: "Email could not be sent! Please try again after 30 seconds!",
+        });
+        return;
+    }
 
     // store the OTP in database
+    await OTP.create({
+        email,
+        otp,
+    });
+
     // send the success response
+    res.status(201);
+    res.json({
+        status: "success",
+        message: `OTP sent to ${email}`,
+    });
 });
 
 // --------------------------------------------------------------
