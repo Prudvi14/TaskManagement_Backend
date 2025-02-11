@@ -121,6 +121,7 @@ app.post("/otps", async (req, res) => {
     }
 
     // store the OTP in database
+    // store it in secured way
     await OTP.create({
         email,
         otp,

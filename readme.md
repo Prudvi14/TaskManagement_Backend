@@ -235,3 +235,38 @@ for example:
 
 * And we will use gmail for sending the OTP
 * * The gmail account should have 2-step-verification ON (manage your google account: security tab ion left panel) and you need to create an APP Password
+
+
+----------------------------------------------------
+encryption - decryption basic example
+
+`
+    const encryptKey = 10;
+
+    const encryptPassword = (plainPassword) => {
+        let encryptedPassword = "";
+        for(let i=0; i<plainPassword.length; i++){
+            const asciiValue = plainPassword.charCodeAt(i);
+            const newAsciiValue = asciiValue + encryptKey;
+            const newChar = String.fromCharCode(newAsciiValue);
+            encryptedPassword += newChar;
+        }
+        console.log(plainPassword, encryptedPassword);
+    }
+
+    const decryptPassword = (encryptedPassword) => {
+        let plainPassword = "";
+        for(let i=0; i<encryptedPassword.length; i++){
+            const asciiValue = encryptedPassword.charCodeAt(i);
+            const newAsciiValue = asciiValue - encryptKey;
+            const newChar = String.fromCharCode(newAsciiValue);
+            plainPassword += newChar;
+        }
+        console.log(plainPassword, encryptedPassword);
+    }
+
+    // encryptPassword("abc");
+    decryptPassword("klm");
+`
+
+-------------------------------------------------
