@@ -1,7 +1,7 @@
 ### STEP 1. 
     npm init -y
 ### STEP 2.
-    npm i express mongodb mongoose nodemon dotenv cors bcrypt cookie-parser morgan jsonwebtoken
+    npm i express mongodb mongoose nodemon dotenv cors bcrypt cookie-parser morgan jsonwebtoken nodemailer
 
 ### STEP 3.
     Make folders "config", "models"
@@ -151,3 +151,87 @@ if you want to add more validators other than type, then use "{" "}"
 * maxLength
 * match
 ( Article to refer: https://mongoosejs.com/docs/validation.html )
+
+### middlewares : 
+are the logic blocks that get executed for the given request if it satisfies the condition
+for example:
+    * app.use(...) --> this middleware works for all request that pass through it! *
+    * app.get / post / ... --> only work for requests who match the http method and route
+    * every middleware has access to req and res object.
+    * the middlewares except get/post/put/patch/delete have also access to next method
+
+### What is the general signup / register procedure for you?
+
+* user tells the email - 1
+* user verifies the email (otp) - 2 (we have to send otp to his email)
+* user tells the password - 2
+* user is registered - 3 (we have to verify if the otp entered by him is correct or not?)
+// after login, he can go to profile and give name
+
+* user tells the full name - **
+
+### what APIs will be the involved in this procedure?
+
+* to sends request to send otp --> POST /otps query for email. Ex. POST /otps?email=likhilesh@ppa.com
+* to sends request to verify otp and set password  --> POST /register BODY:RAW:JSON 
+{
+    "email": "likhilesh@ppa.com",
+    "otp": "1234",
+    "password": "password123"
+}
+
+* URL is visible to everyone over the network, so if we have sensitive data, then we send it in cookies, headers or body (if the connection is HTTPs then Man-in-middle cannot read this encrypted data)
+
+### How should we tackle the problem of sending OTPs? POST /otps?email=
+
+* I need to create the otp when user ask me to send the otp to his email (it is send in the query)
+* Then I need to save that otp somewhere so that in future, when user tries to verify, I can verify.
+* success response
+
+
+### How to generate OTP?
+`
+    // const randomNumber = Math.random(); // --> (0, 1)
+
+    // input --> (0, 1)
+    // f(x) --> ?
+    // output --> (1000, 9999)
+
+    // 1. f(x) = x*10000
+    // f(0.7) = 7000
+    // f(0.6234234) = 6234.234
+    // f(0.000001) = 0.01 (this is not allowed)
+    // f(0.9999999) = 9999.99999
+
+    // 2. f(x) = x*10000 + 1000
+    // f(0.7) = 8000
+    // f(0.6234234) = 7234.234
+    // f(0.000001) = 1000.01 
+    // f(0.9999999) = 10999.99999 (this is not allowed)
+
+    // 2. f(x) = x*9000 + 1000
+    // f(0.7) = 7300
+    // f(0.6234234) = 6610.8106
+    // f(0.000001) = 1000.009 
+    // f(0.9999999) = 9999.9991 
+
+    // --> Ans:  F(x) = Math.floor(g(x))
+    //    Where g(x) = x*9000 + 1000
+
+
+    function generateOTP (){
+        const x = Math.random();
+        const fourDigitDecimalNumber = x*9000 + 1000;
+        const fourDigitNumber = Math.floor(fourDigitDecimalNumber);
+        
+        return fourDigitNumber;
+    }
+`
+
+### How to send the email?
+* https://www.npmjs.com/package/nodemailer
+
+* Example Code: https://nodemailer.com/#example
+
+* And we will use gmail for sending the OTP
+* * The gmail account should have 2-step-verification ON (manage your google account: security tab ion left panel) and you need to create an APP Password

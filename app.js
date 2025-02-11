@@ -5,10 +5,13 @@ const express = require("express"); // we will be using express framework for ou
 const morgan = require("morgan"); // we import a third party library for better logs on console
 const cors = require("cors"); // this allow the browser to enable frontend to connect to backend by giving such permissions
 const User = require("./models/userModel.js");
+const { generateOTP } = require("./utils/otpHelpers.js");
+const { sendOtpEmail } = require("./utils/emailHelpers.js");
 
 // --------------------------------------------------------------
 const app = express(); // we are creating a server using express
 // --------------------------------------------------------------
+
 app.use(cors()); // this code actually allows all origins / domains to talk with backend
 app.use(express.json()); // this will read the request body stream and serializes it into javascript object and attach it on the req object
 
@@ -16,6 +19,10 @@ app.use((req, res, next) => {
     console.log("request received -->", req.url);
     next();
 }); // this is a very basic middleware which logs the request to console
+
+app.get("/", (req, res) => {
+    res.send("<h1>Server is working fine ...</h1>");
+});
 
 app.use(morgan("dev")); // this is a third-party middleware (written by someone else) which logs the request to console in better way
 
@@ -77,6 +84,31 @@ app.post("/users", async (req, res) => {
             });
         }
     }
+});
+
+// request handler to send otp for given email
+app.post("/otps", async (req, res) => {
+    const { email } = req.query;
+    // validate if the user is sending email
+    //TODO: check if the email is in required format using regex or length or ...
+    if (!email) {
+        res.status(400).json({
+            status: "fail",
+            message: 'Missing required parameter: "email"',
+        });
+        return;
+    }
+
+    // create a 4 digit OTP
+    const otp = generateOTP();
+
+    // send the OTP to email
+    const isEmailSent = await sendOtpEmail(email, otp);
+
+    console.log("🟡 : isEmailSent:", isEmailSent);
+
+    // store the OTP in database
+    // send the success response
 });
 
 // --------------------------------------------------------------
