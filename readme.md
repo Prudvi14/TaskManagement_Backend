@@ -306,3 +306,23 @@ For example: The SHA-1 hash of password1 is e38ad214943daad1d64c102faec29de4afe9
 
     testing();
 `
+
+
+// -------------------------------------------------
+
+# how to rename during destructuring 
+`
+    const city = "Mumbai";
+    
+    const obj= {
+        city: "Delhi",
+        country: "India"
+    }
+    
+    // console.log(obj.city)
+    const { city: newCity } = obj;
+
+    console.log(city, newCity);
+`
+
+// -------------------------------------------------

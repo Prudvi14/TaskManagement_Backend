@@ -45,10 +45,53 @@ app.get("/users", (req, res) => {
 });
 
 // request handler for the endpoint with particular http verb or method
-app.post("/users", async (req, res) => {
+/*
+ * creates a new user after validating the OTP against email
+ * it stores the password in secured way
+ */
+
+app.post("/users/register", async (req, res) => {
     try {
-        const userInfo = req.body; // this is from user request
-        const newUser = await User.create(userInfo); // put it in database
+        const { email, password, otp } = req.body; // this is from user request
+
+        // get the otpDoc corresponding to given email from DB
+        // find --> array of length >=0
+        // findOne --> doc or null
+        const otpDoc = await OTP.findOne({
+            email: email,
+        }).sort("-createdAt"); // https://mongoosejs.com/docs/api/query.html
+
+        // check if the otp was sent to email or not
+        if (!otpDoc) {
+            res.status(400);
+            res.json({
+                status: "fail",
+                message: "Either OTP is not sent to the given email or it is expired! Please try again!",
+            });
+            return;
+        }
+
+        const { otp: hashedOtp } = otpDoc; // renaming otp to hashedOtp to avoid conflict in variable names
+
+        // verify if the otp is correct
+        const isOtpCorrect = await bcrypt.compare(otp, hashedOtp);
+        if (!isOtpCorrect) {
+            res.status(401);
+            res.json({
+                status: "fail",
+                message: "Invalid OTP !",
+            });
+            return;
+        }
+
+        // store the password securely
+        const hashedPassword = bcrypt.hash(password, 14);
+
+        const newUser = await User.create({
+            email,
+            password: hashedPassword,
+        }); // put user data in database
+
         res.status(201);
         res.json({
             status: "success",
@@ -125,7 +168,7 @@ app.post("/otps", async (req, res) => {
     // store it in secured way
     // we will use pt.5 in readme
     // algo: bcrypt
-    const newSalt = await bcrypt.genSalt(10); // rounds-x == iterations pow(2,x)
+    const newSalt = await bcrypt.genSalt(14); // rounds-x == iterations pow(2,x)
     const hashedOtp = await bcrypt.hash(otp.toString(), newSalt);
 
     await OTP.create({
