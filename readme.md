@@ -270,3 +270,39 @@ encryption - decryption basic example
 `
 
 -------------------------------------------------
+
+TRY SHA-1 HASH:
+https://sha1.gromweb.com/?string=md1#:~:text=Convert%20a%20string%20to%20a%20SHA%2D1%20hash
+
+For example: The SHA-1 hash of password1 is e38ad214943daad1d64c102faec29de4afe9da3d
+
+
+--------------------------------------------------
+# HOW to store passwords securely?
+--------------------------------------------------
+1. plain text --> no security
+2. encryption --> reverse engineering is highly possible
+3. hashing -----> rainbow tables
+4. hashing + salting --> secure but if DB is leaked, then use of specialized hardwares like GPUs can help new age hackers to crack things down in few hours or a day.
+5. hashing + salting (slow hashing) --> we get enough time to recover and take some measures
+** Your own Application will also slow down the more complex and slow algorithm you use. 
+** You need to stop at an optimized that the application also does not slow down drastically and 
+    you also keep things safer.
+
+--------------------------------------------------
+6. **use well established providers to take care of security. For example: Google sign-in 
+    (you have to pay the providers)
+
+
+// --------------------- --------------------- 
+    ### Testing BCRYPT
+    `
+    const testing = async () => {
+        console.time("salt1");
+        const newSalt = await bcrypt.genSalt(10); // rounds-x == iterations pow(2,x)
+        console.timeEnd("salt1");
+        console.log(newSalt);
+    };
+
+    testing();
+`

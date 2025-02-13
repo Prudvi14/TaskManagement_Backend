@@ -8,6 +8,7 @@ const User = require("./models/userModel.js");
 const { generateOTP } = require("./utils/otpHelpers.js");
 const { sendOtpEmail } = require("./utils/emailHelpers.js");
 const OTP = require("./models/otpModel.js");
+const bcrypt = require("bcrypt");
 
 // --------------------------------------------------------------
 const app = express(); // we are creating a server using express
@@ -89,7 +90,7 @@ app.post("/users", async (req, res) => {
 
 // request handler to send otp for given email
 app.post("/otps", async (req, res) => {
-    const { email } = req.query;
+    const { email } = req.query; // http://localhost:1814/otps?email=lik@abc.com
     // validate if the user is sending email
     //TODO: check if the email is in required format using regex or length or ...
     if (!email) {
@@ -122,9 +123,14 @@ app.post("/otps", async (req, res) => {
 
     // store the OTP in database
     // store it in secured way
+    // we will use pt.5 in readme
+    // algo: bcrypt
+    const newSalt = await bcrypt.genSalt(10); // rounds-x == iterations pow(2,x)
+    const hashedOtp = await bcrypt.hash(otp.toString(), newSalt);
+
     await OTP.create({
         email,
-        otp,
+        otp: hashedOtp,
     });
 
     // send the success response
@@ -139,3 +145,15 @@ app.post("/otps", async (req, res) => {
 app.listen(PORT, () => {
     console.log(`--------- Server Started on PORT: ${PORT} ---------`);
 }); // we are attaching that server to a active port to listen to requests and respond to them
+
+// const testing = async () => {
+//     console.time("hash1");
+//     const newSalt = await bcrypt.genSalt(16); // rounds-x == iterations pow(2,x)
+//     // more rounds --> safer hash <--> more time --> slower application
+//     const newHash = await bcrypt.hash("password1", newSalt);
+//     console.log("salt =", newSalt);
+//     console.log("hash =", newHash);
+//     console.timeEnd("hash1");
+// };
+
+// testing();
