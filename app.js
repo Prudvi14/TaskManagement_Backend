@@ -74,7 +74,7 @@ app.post("/users/register", async (req, res) => {
         const { otp: hashedOtp } = otpDoc; // renaming otp to hashedOtp to avoid conflict in variable names
 
         // verify if the otp is correct
-        const isOtpCorrect = await bcrypt.compare(otp, hashedOtp);
+        const isOtpCorrect = await bcrypt.compare(otp.toString(), hashedOtp);
         if (!isOtpCorrect) {
             res.status(401);
             res.json({
@@ -85,7 +85,7 @@ app.post("/users/register", async (req, res) => {
         }
 
         // store the password securely
-        const hashedPassword = bcrypt.hash(password, 14);
+        const hashedPassword = await bcrypt.hash(password, 14);
 
         const newUser = await User.create({
             email,
