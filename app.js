@@ -10,6 +10,8 @@ const { sendOtpEmail } = require("./utils/emailHelpers.js");
 const OTP = require("./models/otpModel.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
+const Task = require("./models/taskModel.js");
 
 // --------------------------------------------------------------
 const app = express(); // we are creating a server using express
@@ -26,7 +28,7 @@ app.use(
 ); // this code allows only the frontend with origin "http://localhost:5173" to talk with backend and
 // also allows him to send and receive the cookies
 
-app.use(express.json()); // this will read the request body stream and serializes it into javascript object and attach it on the req object
+app.use(express.json()); // this will read the request body stream and serializes it into javascript object and attach it on the req object :: req.body
 
 app.use((req, res, next) => {
     console.log("=> Request received -->", req.url);
@@ -285,11 +287,56 @@ app.post("/users/login", async (req, res) => {
 });
 
 /* 
-    gives the list of all tasks
+    middle ware to authorize the user 
 */
-// app.get("/tasks", async (req, res) => {
 
-// });
+app.use(cookieParser()); // it reads the cookies and add them to req object :: req.cookies
+
+app.use((req, res, next) => {
+    // validate the token
+    //      get the token from cookies :: but express does not read the cookie by default (same like body)
+    //      use a cookie-parser middleware // https://www.npmjs.com/package/cookie-parser
+
+    const { authorization } = req.cookies;
+    jwt.verify(authorization, process.env.JWT_SECRET_KEY, (error, data) => {
+        if (error) {
+            // that means token is invalid (hacking attempt) or expired
+            res.status(401);
+            res.json({
+                status: "fail",
+                message: "Authorization failed!",
+            });
+        }
+        next();
+    });
+});
+
+// CREATEs a task
+app.post("/tasks", async (req, res) => {
+    try {
+        // 1. get the data from request
+        const taskInfo = req.body;
+
+        // 2. validate the data :: now mongoose does that
+        // 3. save the data in db :: MongoDB (online --> ATLAS) (offline is pain to setup :: in deployment we will mostly prefer online)
+        const newTask = await Task.create(taskInfo);
+
+        res.status(201); //created
+        res.json({
+            status: "success",
+            data: {
+                task: newTask,
+            },
+        });
+    } catch (err) {
+        console.log("Error in POST /tasks", err.message);
+        if (err.name === "ValidationError") {
+            res.status(400).json({ status: "fail", message: err.message });
+        } else {
+            res.status(500).json({ status: "fail", message: "Internal Server Error" });
+        }
+    }
+});
 
 // --------------------------------------------------------------
 app.listen(PORT, () => {
