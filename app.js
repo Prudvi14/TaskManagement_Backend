@@ -9,24 +9,34 @@ const { generateOTP } = require("./utils/otpHelpers.js");
 const { sendOtpEmail } = require("./utils/emailHelpers.js");
 const OTP = require("./models/otpModel.js");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 // --------------------------------------------------------------
 const app = express(); // we are creating a server using express
 // --------------------------------------------------------------
 
-app.use(cors()); // this code actually allows all origins / domains to talk with backend
+app.use(morgan("dev")); // this is a third-party middleware (written by someone else) which logs the request to console in better way
+
+// app.use(cors()); // this code actually allows all origins / domains to talk with backend
+app.use(
+    cors({
+        credentials: true,
+        origin: process.env.FRONTEND_URL,
+    })
+); // this code allows only the frontend with origin "http://localhost:5173" to talk with backend and
+// also allows him to send and receive the cookies
+
 app.use(express.json()); // this will read the request body stream and serializes it into javascript object and attach it on the req object
 
 app.use((req, res, next) => {
-    console.log("request received -->", req.url);
+    console.log("=> Request received -->", req.url);
     next();
 }); // this is a very basic middleware which logs the request to console
 
+// health check, or basically to check if server is working fine
 app.get("/", (req, res) => {
     res.send("<h1>Server is working fine ...</h1>");
 });
-
-app.use(morgan("dev")); // this is a third-party middleware (written by someone else) which logs the request to console in better way
 
 // document.addEventListener("click", (ev)=>{ev.target.styles.backgroundColor = 'red'})
 // request handler for the endpoint with particular http verb or method
@@ -185,12 +195,24 @@ app.post("/otps", async (req, res) => {
     });
 });
 
+/*
+    1. validate the password against user account
+    2. issue a JWT token in the cookie
+*/
 app.post("/users/login", async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password } = req.body; // user will send plain password
+
+        if (!email || !password) {
+            res.status(400);
+            res.json({
+                status: "fail",
+                message: "Email and password is required!",
+            });
+        }
 
         // check if the email is of a registered user
-        const currUser = User.findOne({ email: email });
+        const currUser = await User.findOne({ email: email });
 
         if (!currUser) {
             res.status(400);
@@ -202,7 +224,7 @@ app.post("/users/login", async (req, res) => {
         }
 
         // match the password if email ...
-        const { password: hashedPassword, fullName } = currUser;
+        const { password: hashedPassword, fullName, _id } = currUser; // currUser --> DB document
         const isPasswordCorrect = await bcrypt.compare(password, hashedPassword);
 
         // if password is incorrect
@@ -214,6 +236,30 @@ app.post("/users/login", async (req, res) => {
             });
             return;
         }
+
+        // issue a jwt token for the validating the user requests in future
+        const token = jwt.sign(
+            {
+                email,
+                _id,
+                fullName,
+            }, // payload
+            process.env.JWT_SECRET_KEY, // secret key
+            {
+                expiresIn: "1d", // https://github.com/vercel/ms
+            } // extra options if you want to specify
+        );
+
+        // res.cookie method adds a cookie to frontend in the format :: name, value
+        // frontend should allow the backend to perform cookie operations
+        // in the request use --> credentials: "include" (when you use fetch API)
+        // in the cors options on backend mention --> credentials: true
+        res.cookie("authorization", token, {
+            httpOnly: true, // it cannot be accessed by JS code on client machine
+            secure: true, // it will be only sent on https connections
+            sameSite: "None", // currently our backend is on separate domain and frontend is on separate domain
+            // in production, when you host BE and FE on same domain, make it "Strict"
+        });
 
         res.status(200);
         res.json({
@@ -229,7 +275,7 @@ app.post("/users/login", async (req, res) => {
 
         // send success
     } catch (err) {
-        console.log(err.message);
+        console.log("Error in login", err.message);
         res.status(500);
         res.json({
             status: "fail",
@@ -237,6 +283,13 @@ app.post("/users/login", async (req, res) => {
         });
     }
 });
+
+/* 
+    gives the list of all tasks
+*/
+// app.get("/tasks", async (req, res) => {
+
+// });
 
 // --------------------------------------------------------------
 app.listen(PORT, () => {
