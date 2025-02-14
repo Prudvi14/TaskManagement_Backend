@@ -293,22 +293,42 @@ app.post("/users/login", async (req, res) => {
 app.use(cookieParser()); // it reads the cookies and add them to req object :: req.cookies
 
 app.use((req, res, next) => {
-    // validate the token
-    //      get the token from cookies :: but express does not read the cookie by default (same like body)
-    //      use a cookie-parser middleware // https://www.npmjs.com/package/cookie-parser
+    try {
+        // validate the token
+        //      get the token from cookies :: but express does not read the cookie by default (same like body)
+        //      use a cookie-parser middleware // https://www.npmjs.com/package/cookie-parser
 
-    const { authorization } = req.cookies;
-    jwt.verify(authorization, process.env.JWT_SECRET_KEY, (error, data) => {
-        if (error) {
-            // that means token is invalid (hacking attempt) or expired
+        const { authorization } = req.cookies;
+        // we check if authorization key is present in request cookies or not
+        if (!authorization) {
             res.status(401);
             res.json({
                 status: "fail",
                 message: "Authorization failed!",
             });
         }
-        next();
-    });
+
+        // if authorization cookie is present then verify the token
+        jwt.verify(authorization, process.env.JWT_SECRET_KEY, (error, data) => {
+            if (error) {
+                // that means token is invalid (hacking attempt) or expired
+                res.status(401);
+                res.json({
+                    status: "fail",
+                    message: "Authorization failed!",
+                });
+            } else {
+                next();
+            }
+        });
+    } catch (err) {
+        console.log("Error in validation middleware", err.message);
+        res.status(500);
+        res.json({
+            status: "fail",
+            message: "Internal Server Error",
+        });
+    }
 });
 
 // CREATEs a task
@@ -331,6 +351,8 @@ app.post("/tasks", async (req, res) => {
     } catch (err) {
         console.log("Error in POST /tasks", err.message);
         if (err.name === "ValidationError") {
+            res.status(400).json({ status: "fail", message: err.message });
+        } else if (err.code === 11000) {
             res.status(400).json({ status: "fail", message: err.message });
         } else {
             res.status(500).json({ status: "fail", message: "Internal Server Error" });
