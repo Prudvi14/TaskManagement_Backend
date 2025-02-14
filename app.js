@@ -55,7 +55,7 @@ app.post("/users/register", async (req, res) => {
         const { email, password, otp } = req.body; // this is from user request
 
         // get the otpDoc corresponding to given email from DB
-        // find --> array of length >=0
+        // find --> array of documents and its length is >=0
         // findOne --> doc or null
         const otpDoc = await OTP.findOne({
             email: email,
@@ -132,6 +132,7 @@ app.post("/users/register", async (req, res) => {
 });
 
 // request handler to send otp for given email
+//TODO: Add try catch
 app.post("/otps", async (req, res) => {
     const { email } = req.query; // http://localhost:1814/otps?email=lik@abc.com
     // validate if the user is sending email
@@ -182,6 +183,59 @@ app.post("/otps", async (req, res) => {
         status: "success",
         message: `OTP sent to ${email}`,
     });
+});
+
+app.post("/users/login", async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        // check if the email is of a registered user
+        const currUser = User.findOne({ email: email });
+
+        if (!currUser) {
+            res.status(400);
+            res.json({
+                status: "fail",
+                message: "User is not registered!",
+            });
+            return;
+        }
+
+        // match the password if email ...
+        const { password: hashedPassword, fullName } = currUser;
+        const isPasswordCorrect = await bcrypt.compare(password, hashedPassword);
+
+        // if password is incorrect
+        if (!isPasswordCorrect) {
+            res.status(401);
+            res.json({
+                status: "fail",
+                message: "Invalid email or password!",
+            });
+            return;
+        }
+
+        res.status(200);
+        res.json({
+            status: "success",
+            message: "User logged in",
+            data: {
+                user: {
+                    email,
+                    fullName,
+                },
+            },
+        });
+
+        // send success
+    } catch (err) {
+        console.log(err.message);
+        res.status(500);
+        res.json({
+            status: "fail",
+            message: "Internal Server Error",
+        });
+    }
 });
 
 // --------------------------------------------------------------
