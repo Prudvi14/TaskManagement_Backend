@@ -146,7 +146,8 @@ app.post("/users/register", async (req, res) => {
 // request handler to send otp for given email
 //TODO: Add try catch
 app.post("/otps", async (req, res) => {
-    const { email } = req.query; // http://localhost:1814/otps?email=lik@abc.com
+    // const { email } = req.query; // http://localhost:1814/otps?email=lik@abc.com
+    const { email } = req.body; // send it in body n json format
     // validate if the user is sending email
     //TODO: check if the email is in required format using regex or length or ...
     if (!email) {
