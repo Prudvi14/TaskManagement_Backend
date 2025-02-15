@@ -64,7 +64,7 @@ app.get("/users", (req, res) => {
 
 app.post("/users/register", async (req, res) => {
     try {
-        const { email, password, otp } = req.body; // this is from user request
+        const { email, password, otp, fullName } = req.body; // this is from user request
 
         // get the otpDoc corresponding to given email from DB
         // find --> array of documents and its length is >=0
@@ -102,6 +102,7 @@ app.post("/users/register", async (req, res) => {
         const newUser = await User.create({
             email,
             password: hashedPassword,
+            fullName,
         }); // put user data in database
 
         res.status(201);
