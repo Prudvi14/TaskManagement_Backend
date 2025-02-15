@@ -287,7 +287,7 @@ app.post("/users/login", async (req, res) => {
 });
 
 /* 
-    middle ware to authorize the user 
+    middleware to authorize the user 
 */
 
 app.use(cookieParser()); // it reads the cookies and add them to req object :: req.cookies
@@ -306,6 +306,7 @@ app.use((req, res, next) => {
                 status: "fail",
                 message: "Authorization failed!",
             });
+            return;
         }
 
         // if authorization cookie is present then verify the token
@@ -318,6 +319,7 @@ app.use((req, res, next) => {
                     message: "Authorization failed!",
                 });
             } else {
+                req.currUser = data;
                 next();
             }
         });
@@ -336,10 +338,14 @@ app.post("/tasks", async (req, res) => {
     try {
         // 1. get the data from request
         const taskInfo = req.body;
+        const { email } = req.currUser;
 
         // 2. validate the data :: now mongoose does that
         // 3. save the data in db :: MongoDB (online --> ATLAS) (offline is pain to setup :: in deployment we will mostly prefer online)
-        const newTask = await Task.create(taskInfo);
+        const newTask = await Task.create({
+            ...taskInfo,
+            assignor: email,
+        });
 
         res.status(201); //created
         res.json({
