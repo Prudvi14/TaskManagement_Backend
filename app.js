@@ -368,6 +368,29 @@ app.post("/tasks", async (req, res) => {
     }
 });
 
+app.get("/users/me", (req, res) => {
+    try {
+        const { email, fullName } = req.currUser;
+        res.status(200);
+        res.json({
+            status: "success",
+            data: {
+                user: {
+                    email,
+                    fullName,
+                },
+            },
+        });
+    } catch (err) {
+        console.log("error is GET /users/me", err.message);
+        res.status(500);
+        res.json({
+            status: "fail",
+            message: "INTERNAL SERVER ERROR",
+        });
+    }
+});
+
 // --------------------------------------------------------------
 app.listen(PORT, () => {
     console.log(`--------- Server Started on PORT: ${PORT} ---------`);
