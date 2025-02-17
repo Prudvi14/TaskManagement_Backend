@@ -6,12 +6,24 @@ const morgan = require("morgan"); // we import a third party library for better 
 const cors = require("cors"); // this allow the browser to enable frontend to connect to backend by giving such permissions
 const User = require("./models/userModel.js");
 const { generateOTP } = require("./utils/otpHelpers.js");
-const { sendOtpEmail } = require("./utils/emailHelpers.js");
+const { sendOtpEmail, sendReminderMail } = require("./utils/emailHelpers.js");
 const OTP = require("./models/otpModel.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const Task = require("./models/taskModel.js");
+
+const cron = require("node-cron");
+
+cron.schedule("* * * * *", () => {
+    console.log("---- ---- ---- running a task every minute");
+    //whatever code you write here will run every minute
+    // search for all the tasks that have deadline in current time +- 1 minute
+    // send mail to them
+
+    // function with dummy data
+    // sendReminderMail("likhilesh@programmingpathshala.com", "Task 1");
+});
 
 // --------------------------------------------------------------
 const app = express(); // we are creating a server using express
@@ -379,6 +391,36 @@ app.get("/users/me", (req, res) => {
                     email,
                     fullName,
                 },
+            },
+        });
+    } catch (err) {
+        console.log("error is GET /users/me", err.message);
+        res.status(500);
+        res.json({
+            status: "fail",
+            message: "INTERNAL SERVER ERROR",
+        });
+    }
+});
+
+app.get("/users/logout", (req, res) => {
+    // use try-catch here
+    res.clearCookie("authorization");
+    res.json({
+        status: "success",
+        message: "User is logged out!",
+    });
+});
+
+app.get("/tasks", async (req, res) => {
+    try {
+        // we only need to send the tasks where either assignor is the current user or assignee is current user
+        const taskList = await Task.find().or([{ assignor: req.currUser.email }, { assignee: req.currUser.email }]);
+        res.status(200);
+        res.json({
+            status: "success",
+            data: {
+                tasks: taskList,
             },
         });
     } catch (err) {

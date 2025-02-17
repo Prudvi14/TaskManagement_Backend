@@ -40,6 +40,13 @@ const sendOtpEmail = async (email, otp) => {
     return isEmailSent;
 };
 
+const sendReminderMail = async (email, task) => {
+    const isEmailSent = await sendEmail(email, "Task Reminder", `<p>Your task is pending ${task}</p>`);
+    //TODO: you can retry to do something else : its upto you
+    return isEmailSent;
+};
+
 module.exports = {
     sendOtpEmail,
+    sendReminderMail,
 };
