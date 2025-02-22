@@ -7,9 +7,9 @@ const URL_WITH_PASSWORD_AND_DB_NAME = URL_WITH_PASSWORD.replace("/?", `/${proces
 const connectToDb = async () => {
     try {
         await mongoose.connect(URL_WITH_PASSWORD_AND_DB_NAME);
-        console.log("------------- MONGO_DB CONNECTED ---------------");
+        console.log("--------- MONGO_DB CONNECTED ---------");
     } catch (err) {
-        console.log("----------- MONGO_DB NOT CONNECTED -------------");
+        console.log("------ MONGO_DB NOT CONNECTED --------");
         console.log(err.message);
     }
 };

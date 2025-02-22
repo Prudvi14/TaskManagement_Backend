@@ -1,4 +1,4 @@
-const mongoose = require("mongoose"); //mongoose is our helper which will talk to mongodb
+const mongoose = require("mongoose"); 
 
 const userSchema = new mongoose.Schema(
     {
@@ -9,8 +9,8 @@ const userSchema = new mongoose.Schema(
         email: {
             type: String,
             trim: true,
-            unique: true, // sql: Create table ... unique
-            required: true, // sql: Create table ... NOT NULL
+            unique: true, 
+            required: true, 
         },
         password: {
             type: String,
