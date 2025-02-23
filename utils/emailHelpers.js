@@ -10,8 +10,6 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendEmail = async (to, subject, html) => {
-    // console.log(process.env.SEND_MAIL_GMAIL_ACCOUNT);
-    // console.log(process.env.SEND_MAIL_GMAIL_ACCOUNT_PASSWORD);
     try {
         const info = await transporter.sendMail({
             from: '"Task Management Tool" <prudhvigadeshulantr@gmail.com>',
@@ -36,14 +34,12 @@ const sendOtpEmail = async (email, otp) => {
     );
     return isEmailSent;
 };
-
-// const sendReminderMail = async (email, task) => {
-//     const isEmailSent = await sendEmail(email, "Task Reminder", `<p>Your task is pending ${task}</p>`);
-//     //TODO: you can retry to do something else : its upto you
-//     return isEmailSent;
-// };
+const sendReminderMail = async (email, task) => {
+    const isEmailSent = await sendEmail(email, "Task Reminder", `<p>Your task is pending ${task}</p>`);
+    return isEmailSent;
+};
 
 module.exports = {
     sendOtpEmail,
-    // sendReminderMail,
+    sendReminderMail,
 };
